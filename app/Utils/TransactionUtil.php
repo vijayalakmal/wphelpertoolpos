@@ -1534,10 +1534,19 @@ class TransactionUtil extends Util
                             if ($value['is_return'] == 1) {
                             }
                         } elseif ($value['method'] == 'card') {
+                            $masked_card = null;
+                            if (! empty($value['card_number'])) {
+                                $last4 = substr(preg_replace('/\\D/', '', $value['card_number']), -4);
+                                $masked_card = '**** **** **** ' . $last4;
+                            }
                             $output['payments'][] =
-                                ['method' => $method.(! empty($value['card_transaction_number']) ? (', Transaction Number:'.$value['card_transaction_number']) : ''),
+                                [
+                                    'method' => $method.(! empty($value['card_transaction_number']) ? (', Transaction Number:'.$value['card_transaction_number']) : ''),
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
+                                    'card_number' => $masked_card,
+                                    'card_type' => ! empty($value['card_type']) ? $value['card_type'] : null,
+                                    'card_transaction_number' => ! empty($value['card_transaction_number']) ? $value['card_transaction_number'] : null,
                                 ];
                         } elseif ($value['method'] == 'cheque') {
                             $output['payments'][] =
